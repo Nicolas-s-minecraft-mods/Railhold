@@ -14,6 +14,10 @@ logoBlur = false
 # The mod list shows the translated description (key: fml.menu.mods.info.description.<mod_id>) when it exists.
 description = '''${mod_description}'''
 
+# Two linked minecarts do not push each other. A minecart in a train with a locomotive gets the speed cap of its train.
+[[mixins]]
+config = "railhold.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
