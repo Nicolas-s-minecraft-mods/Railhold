@@ -1,0 +1,86 @@
+package io.github.nicolasgoyon.railhold.registry;
+
+import io.github.nicolasgoyon.railhold.Railhold;
+import io.github.nicolasgoyon.railhold.rail.DoubleChestMinecart;
+import io.github.nicolasgoyon.railhold.rail.EnderChestMinecart;
+import io.github.nicolasgoyon.railhold.rail.FurnaceLocomotive;
+import io.github.nicolasgoyon.railhold.rail.HeavyLocomotive;
+import io.github.nicolasgoyon.railhold.rail.ShulkerMinecart;
+import java.util.List;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+/** Entity types of Railhold. */
+public final class ModEntities {
+    private static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
+            DeferredRegister.create(Registries.ENTITY_TYPE, Railhold.MOD_ID);
+
+    /** The furnace locomotive. Same size as a vanilla minecart. */
+    public static final DeferredHolder<EntityType<?>, EntityType<FurnaceLocomotive>> FURNACE_LOCOMOTIVE =
+            ENTITY_TYPES.register("furnace_locomotive", () -> EntityType.Builder
+                    .<FurnaceLocomotive>of(FurnaceLocomotive::new, MobCategory.MISC)
+                    .sized(0.98F, 0.7F)
+                    .passengerAttachments(0.1875F)
+                    .clientTrackingRange(8)
+                    .build("furnace_locomotive"));
+
+    /** The heavy locomotive. Same size as a vanilla minecart. */
+    public static final DeferredHolder<EntityType<?>, EntityType<HeavyLocomotive>> HEAVY_LOCOMOTIVE =
+            ENTITY_TYPES.register("heavy_locomotive", () -> EntityType.Builder
+                    .<HeavyLocomotive>of(HeavyLocomotive::new, MobCategory.MISC)
+                    .sized(0.98F, 0.7F)
+                    .passengerAttachments(0.1875F)
+                    .clientTrackingRange(8)
+                    .build("heavy_locomotive"));
+
+    /** The double chest minecart. Same size as a vanilla minecart. */
+    public static final DeferredHolder<EntityType<?>, EntityType<DoubleChestMinecart>> DOUBLE_CHEST_MINECART =
+            ENTITY_TYPES.register("double_chest_minecart", () -> EntityType.Builder
+                    .<DoubleChestMinecart>of(DoubleChestMinecart::new, MobCategory.MISC)
+                    .sized(0.98F, 0.7F)
+                    .passengerAttachments(0.1875F)
+                    .clientTrackingRange(8)
+                    .build("double_chest_minecart"));
+    /** The shulker box minecart. Same size as a vanilla minecart. */
+    public static final DeferredHolder<EntityType<?>, EntityType<ShulkerMinecart>> SHULKER_BOX_MINECART =
+            ENTITY_TYPES.register("shulker_box_minecart", () -> EntityType.Builder
+                    .<ShulkerMinecart>of(ShulkerMinecart::new, MobCategory.MISC)
+                    .sized(0.98F, 0.7F)
+                    .passengerAttachments(0.1875F)
+                    .clientTrackingRange(8)
+                    .build("shulker_box_minecart"));
+    /** The ender chest minecart. Same size as a vanilla minecart. It has no item handler: hoppers have no access. */
+    public static final DeferredHolder<EntityType<?>, EntityType<EnderChestMinecart>> ENDER_CHEST_MINECART =
+            ENTITY_TYPES.register("ender_chest_minecart", () -> EntityType.Builder
+                    .<EnderChestMinecart>of(EnderChestMinecart::new, MobCategory.MISC)
+                    .sized(0.98F, 0.7F)
+                    .passengerAttachments(0.1875F)
+                    .clientTrackingRange(8)
+                    .build("ender_chest_minecart"));
+
+    private ModEntities() {
+    }
+
+    public static void register(IEventBus modEventBus) {
+        WorldAliases.add(ENTITY_TYPES);
+        ENTITY_TYPES.register(modEventBus);
+        modEventBus.addListener(ModEntities::onRegisterCapabilities);
+    }
+
+    /** The item handlers of the minecarts with a container, as NeoForge gives them to the vanilla chest minecart. */
+    private static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        for (EntityType<? extends AbstractMinecartContainer> type
+                : List.of(DOUBLE_CHEST_MINECART.get(), SHULKER_BOX_MINECART.get())) {
+            event.registerEntity(Capabilities.ItemHandler.ENTITY, type, (cart, context) -> new InvWrapper(cart));
+            event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, type, (cart, side) -> new InvWrapper(cart));
+        }
+    }
+}
